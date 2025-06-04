@@ -1,7 +1,15 @@
 import React from 'react';
 import BaseNode from '../components/BaseNode';
-import TranslationContent from '../components/nodes/TranslationContent';
 import { InputNode } from '../nodes/inputNode';
+import { TextNode } from '../nodes/textNode';
+import { LLMNode } from '../nodes/llmNode';
+import { OutputNode } from '../nodes/outputNode';
+import { MathNode } from '../nodes/mathNode';
+import { PromptNode } from '../nodes/promptNode';
+import { ImageNode } from '../nodes/imageNode';
+import { FilterNode } from '../nodes/filterNode';
+import { LoggerNode } from '../nodes/loggerNode';
+import TranslationContent from '../components/nodes/TranslationContent';
 
 // Node-specific content components
 const TextEditor = () => (
@@ -63,69 +71,64 @@ export const nodeDefinitions = {
     outputs: ["output"],
     component: InputNode,
     style: { 
-      background: '#f0f7ff',
-      minWidth: '250px',
-      padding: '15px',
-      borderRadius: '8px',
-      border: '1px solid rgba(0, 0, 0, 0.1)',
-      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
+      background: '#fff5f5',
+      minWidth: '250px'
     }
   },
   TextNode: {
     label: "Text",
     inputs: [],
     outputs: ["text"],
-    content: <TextEditor />,
+    component: TextNode,
     style: { background: '#fff5f5' }
   },
   LLMNode: {
     label: "LLM",
     inputs: ["prompt"],
     outputs: ["response"],
-    content: <div>LLM Configuration</div>,
+    component: LLMNode,
     style: { background: '#f0fff4' }
   },
   OutputNode: {
     label: "Output",
     inputs: ["input"],
     outputs: [],
-    content: <div>Output Display</div>,
+    component: OutputNode,
     style: { background: '#fff0f6' }
   },
-  // New Demo Nodes
   MathNode: {
     label: "Math Operation",
     inputs: ["value1", "value2"],
     outputs: ["result"],
-    content: <MathForm />,
+    component: MathNode,
     style: { background: '#f3f0ff' }
   },
   PromptNode: {
     label: "Prompt Template",
     inputs: ["variables"],
     outputs: ["prompt"],
-    content: <PromptInput />,
+    component: PromptNode,
     style: { background: '#fff0eb' }
   },
   ImageNode: {
     label: "Image Processing",
     inputs: ["image"],
     outputs: ["processed"],
-    content: <ImagePreview />,
+    component: ImageNode,
     style: { background: '#f0fff4' }
   },
   FilterNode: {
     label: "Filter",
     inputs: ["data"],
     outputs: ["filtered", "rejected"],
-    content: <FilterConfig />,
+    component: FilterNode,
     style: { background: '#fff8f0' }
   },
   LoggerNode: {
     label: "Logger",
     inputs: ["data"],
     outputs: ["logged"],
-    content: <LoggerConfig />,
+    component: LoggerNode,
     style: { background: '#f5f5f5' }
   },
   // Add the new Translation Node

@@ -1,35 +1,34 @@
-// llmNode.js
-
 import { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import BaseNode from '../components/BaseNode';
-import { HiOutlineCpuChip } from 'react-icons/hi2';
+import { FiFilter } from 'react-icons/fi';
 
-const LLM_MODELS = {
-  'gpt-4': 'GPT-4',
-  'gpt-3.5-turbo': 'GPT-3.5 Turbo',
-  'claude-3-opus': 'Claude 3 Opus',
-  'claude-3-sonnet': 'Claude 3 Sonnet',
-  'gemini-pro': 'Gemini Pro',
-  'mistral-large': 'Mistral Large',
-  'llama-2': 'Llama 2'
+const FILTER_OPERATIONS = {
+  'equals': 'Equals',
+  'contains': 'Contains',
+  'startsWith': 'Starts With',
+  'endsWith': 'Ends With',
+  'greaterThan': 'Greater Than',
+  'lessThan': 'Less Than',
+  'between': 'Between',
+  'regex': 'Regular Expression'
 };
 
-export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
-  const [model, setModel] = useState(data?.model || 'gpt-4');
-  const [systemPrompt, setSystemPrompt] = useState(data?.systemPrompt || '');
+export const FilterNode = ({ id, data = { isExpanded: true }, ...props }) => {
+  const [operation, setOperation] = useState(data?.operation || 'equals');
+  const [condition, setCondition] = useState(data?.condition || '');
 
-  const handleModelChange = (e) => {
-    setModel(e.target.value);
+  const handleOperationChange = (e) => {
+    setOperation(e.target.value);
     if (data?.onDataChange) {
-      data.onDataChange(id, 'model', e.target.value);
+      data.onDataChange(id, 'operation', e.target.value);
     }
   };
 
-  const handleSystemPromptChange = (e) => {
-    setSystemPrompt(e.target.value);
+  const handleConditionChange = (e) => {
+    setCondition(e.target.value);
     if (data?.onDataChange) {
-      data.onDataChange(id, 'systemPrompt', e.target.value);
+      data.onDataChange(id, 'condition', e.target.value);
     }
   };
 
@@ -67,19 +66,16 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
     paddingRight: '32px'
   };
 
-  const textareaStyle = {
+  const inputStyle = {
     padding: '8px 12px',
     borderRadius: '6px',
     border: '1px solid #ddd',
     fontSize: '0.9rem',
     width: '100%',
-    minHeight: '80px',
     boxSizing: 'border-box',
     outline: 'none',
     transition: 'all 0.2s ease',
     backgroundColor: '#fff',
-    resize: 'vertical',
-    fontFamily: 'inherit',
     '&:focus': {
       borderColor: '#6466f1',
       boxShadow: '0 0 0 3px rgba(100, 102, 241, 0.1)'
@@ -94,8 +90,8 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
         gap: '8px',
         width: '100%'
       }}>
-        <HiOutlineCpuChip size={18} />
-        <span style={{ flex: 1 }}>LLM</span>
+        <FiFilter size={18} />
+        <span style={{ flex: 1 }}>Filter</span>
       </div>
       <div style={{
         fontSize: '0.75rem',
@@ -104,7 +100,7 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
         lineHeight: '1.4',
         width: '100%'
       }}>
-        Process text using large language models
+        Filter data based on conditions
       </div>
     </div>
   );
@@ -119,13 +115,13 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
       gap: '12px'
     }}>
       <div style={inputGroupStyle}>
-        <label style={labelStyle}>Model</label>
+        <label style={labelStyle}>Operation</label>
         <select 
-          value={model}
-          onChange={handleModelChange}
+          value={operation}
+          onChange={handleOperationChange}
           style={selectStyle}
         >
-          {Object.entries(LLM_MODELS).map(([value, label]) => (
+          {Object.entries(FILTER_OPERATIONS).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -134,12 +130,13 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
       </div>
 
       <div style={inputGroupStyle}>
-        <label style={labelStyle}>System Prompt</label>
-        <textarea
-          value={systemPrompt}
-          onChange={handleSystemPromptChange}
-          style={textareaStyle}
-          placeholder="Enter system instructions..."
+        <label style={labelStyle}>Condition</label>
+        <input
+          type="text"
+          value={condition}
+          onChange={handleConditionChange}
+          style={inputStyle}
+          placeholder="Enter filter condition..."
         />
       </div>
     </div>
@@ -148,17 +145,17 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
   return (
     <BaseNode
       id={id}
-      type="LLMNode"
+      type="FilterNode"
       label={titleContent}
       data={{
         ...data,
         isExpanded: data.isExpanded ?? true,
         label: titleContent,
-        model,
-        systemPrompt
+        operation,
+        condition
       }}
       content={nodeContent}
       {...props}
     />
   );
-};
+}; 

@@ -1,35 +1,31 @@
-// llmNode.js
-
 import { useState } from 'react';
 import { Handle, Position } from 'reactflow';
 import BaseNode from '../components/BaseNode';
-import { HiOutlineCpuChip } from 'react-icons/hi2';
+import { VscOutput } from 'react-icons/vsc';
 
-const LLM_MODELS = {
-  'gpt-4': 'GPT-4',
-  'gpt-3.5-turbo': 'GPT-3.5 Turbo',
-  'claude-3-opus': 'Claude 3 Opus',
-  'claude-3-sonnet': 'Claude 3 Sonnet',
-  'gemini-pro': 'Gemini Pro',
-  'mistral-large': 'Mistral Large',
-  'llama-2': 'Llama 2'
+const LOG_LEVELS = {
+  'info': 'Info',
+  'warning': 'Warning',
+  'error': 'Error',
+  'debug': 'Debug',
+  'trace': 'Trace'
 };
 
-export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
-  const [model, setModel] = useState(data?.model || 'gpt-4');
-  const [systemPrompt, setSystemPrompt] = useState(data?.systemPrompt || '');
+export const LoggerNode = ({ id, data = { isExpanded: true }, ...props }) => {
+  const [logLevel, setLogLevel] = useState(data?.logLevel || 'info');
+  const [prefix, setPrefix] = useState(data?.prefix || '');
 
-  const handleModelChange = (e) => {
-    setModel(e.target.value);
+  const handleLevelChange = (e) => {
+    setLogLevel(e.target.value);
     if (data?.onDataChange) {
-      data.onDataChange(id, 'model', e.target.value);
+      data.onDataChange(id, 'logLevel', e.target.value);
     }
   };
 
-  const handleSystemPromptChange = (e) => {
-    setSystemPrompt(e.target.value);
+  const handlePrefixChange = (e) => {
+    setPrefix(e.target.value);
     if (data?.onDataChange) {
-      data.onDataChange(id, 'systemPrompt', e.target.value);
+      data.onDataChange(id, 'prefix', e.target.value);
     }
   };
 
@@ -67,19 +63,16 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
     paddingRight: '32px'
   };
 
-  const textareaStyle = {
+  const inputStyle = {
     padding: '8px 12px',
     borderRadius: '6px',
     border: '1px solid #ddd',
     fontSize: '0.9rem',
     width: '100%',
-    minHeight: '80px',
     boxSizing: 'border-box',
     outline: 'none',
     transition: 'all 0.2s ease',
     backgroundColor: '#fff',
-    resize: 'vertical',
-    fontFamily: 'inherit',
     '&:focus': {
       borderColor: '#6466f1',
       boxShadow: '0 0 0 3px rgba(100, 102, 241, 0.1)'
@@ -94,8 +87,8 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
         gap: '8px',
         width: '100%'
       }}>
-        <HiOutlineCpuChip size={18} />
-        <span style={{ flex: 1 }}>LLM</span>
+        <VscOutput size={18} />
+        <span style={{ flex: 1 }}>Logger</span>
       </div>
       <div style={{
         fontSize: '0.75rem',
@@ -104,7 +97,7 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
         lineHeight: '1.4',
         width: '100%'
       }}>
-        Process text using large language models
+        Log data with different severity levels
       </div>
     </div>
   );
@@ -119,13 +112,13 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
       gap: '12px'
     }}>
       <div style={inputGroupStyle}>
-        <label style={labelStyle}>Model</label>
+        <label style={labelStyle}>Log Level</label>
         <select 
-          value={model}
-          onChange={handleModelChange}
+          value={logLevel}
+          onChange={handleLevelChange}
           style={selectStyle}
         >
-          {Object.entries(LLM_MODELS).map(([value, label]) => (
+          {Object.entries(LOG_LEVELS).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -134,12 +127,13 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
       </div>
 
       <div style={inputGroupStyle}>
-        <label style={labelStyle}>System Prompt</label>
-        <textarea
-          value={systemPrompt}
-          onChange={handleSystemPromptChange}
-          style={textareaStyle}
-          placeholder="Enter system instructions..."
+        <label style={labelStyle}>Prefix</label>
+        <input
+          type="text"
+          value={prefix}
+          onChange={handlePrefixChange}
+          style={inputStyle}
+          placeholder="Enter log prefix..."
         />
       </div>
     </div>
@@ -148,17 +142,17 @@ export const LLMNode = ({ id, data = { isExpanded: true }, ...props }) => {
   return (
     <BaseNode
       id={id}
-      type="LLMNode"
+      type="LoggerNode"
       label={titleContent}
       data={{
         ...data,
         isExpanded: data.isExpanded ?? true,
         label: titleContent,
-        model,
-        systemPrompt
+        logLevel,
+        prefix
       }}
       content={nodeContent}
       {...props}
     />
   );
-};
+}; 

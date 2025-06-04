@@ -162,20 +162,6 @@ export const InputNode = ({ id, data = { isExpanded: true }, ...props }) => {
           ))}
         </select>
       </div>
-
-      <Handle
-        type="source"
-        position={Position.Right}
-        id={`${id}-value`}
-        style={{
-          background: '#6466f1',
-          width: '8px',
-          height: '8px',
-          border: '2px solid #fff',
-          opacity: !data?.isExpanded ? 0 : 1,
-          transition: 'opacity 0.3s ease'
-        }}
-      />
     </div>
   );
 

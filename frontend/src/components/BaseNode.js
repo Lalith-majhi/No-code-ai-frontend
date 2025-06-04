@@ -1,109 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Handle } from 'reactflow';
 import { theme } from '../styles/theme';
 import { IoExpandOutline, IoContractOutline } from 'react-icons/io5';
 import { RiDeleteBinLine } from 'react-icons/ri';
 import { MdClose } from 'react-icons/md';
 
-const DeleteConfirmDialog = ({ onConfirm, onCancel, nodeName }) => {
+const DeleteConfirmDialog = ({ onCancel }) => {
+  const dialogRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dialogRef.current && !dialogRef.current.contains(event.target)) {
+        onCancel();
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [onCancel]);
+
   return (
-    <div style={{
-      position: 'absolute',
-      top: '100%',
-      right: '0',
-      marginTop: '8px',
-      background: 'white',
-      padding: '16px',
-      borderRadius: '12px',
-      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.15)',
-      border: '1px solid rgba(0, 0, 0, 0.1)',
-      zIndex: 1000,
-      width: '220px',
-      animation: 'fadeIn 0.2s ease'
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: '12px'
-      }}>
-        <h4 style={{ 
-          margin: 0, 
-          fontSize: '0.9rem',
-          color: '#ef4444'
-        }}>
-          Delete Node
-        </h4>
-        <button
-          onClick={onCancel}
-          style={{
-            border: 'none',
-            background: 'none',
-            padding: '4px',
-            cursor: 'pointer',
-            borderRadius: '4px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            color: 'rgba(0, 0, 0, 0.5)',
-            '&:hover': {
-              background: 'rgba(0, 0, 0, 0.05)'
-            }
-          }}
-        >
-          <MdClose size={16} />
-        </button>
-      </div>
-      <p style={{ 
-        margin: '0 0 16px 0',
-        fontSize: '0.8rem',
-        color: 'rgba(0, 0, 0, 0.7)',
-        lineHeight: '1.4'
-      }}>
-        Are you sure you want to delete "{nodeName}"? This action cannot be undone.
-      </p>
-      <div style={{
-        display: 'flex',
-        gap: '8px',
-        justifyContent: 'flex-end'
-      }}>
-        <button
-          onClick={onCancel}
-          style={{
-            padding: '6px 12px',
-            border: '1px solid rgba(0, 0, 0, 0.1)',
-            borderRadius: '6px',
-            background: 'white',
-            color: 'rgba(0, 0, 0, 0.7)',
-            fontSize: '0.8rem',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              background: 'rgba(0, 0, 0, 0.05)'
-            }
-          }}
-        >
-          Cancel
-        </button>
-        <button
-          onClick={onConfirm}
-          style={{
-            padding: '6px 12px',
-            border: 'none',
-            borderRadius: '6px',
-            background: '#ef4444',
-            color: 'white',
-            fontSize: '0.8rem',
-            cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            '&:hover': {
-              background: '#dc2626'
-            }
-          }}
-        >
-          Delete
-        </button>
-      </div>
+    <div 
+      ref={dialogRef}
+      className="delete-confirm-dialog"
+      style={{
+        position: 'absolute',
+        top: '-24px',
+        right: '0',
+        background: 'white',
+        padding: '4px 6px',
+        borderRadius: '4px',
+        boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)',
+        border: '1px solid rgba(239, 68, 68, 0.1)',
+        zIndex: 1000,
+        fontSize: '0.65rem',
+        color: '#374151',
+        whiteSpace: 'nowrap',
+        animation: 'fadeIn 0.2s ease'
+      }}
+    >
+      Click again to delete
     </div>
   );
 };
@@ -119,8 +57,9 @@ const BaseNode = ({
   data = { isExpanded: true }
 }) => {
   const [isHovered, setIsHovered] = useState(false);
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [deleteConfirmState, setDeleteConfirmState] = useState(false);
   const isExpanded = data?.isExpanded ?? true;
+  const nodeRef = useRef(null);
 
   const baseStyle = {
     padding: '12px',
@@ -231,43 +170,33 @@ const BaseNode = ({
 
   const handleDeleteClick = (e) => {
     e.stopPropagation();
-    setShowDeleteConfirm(true);
-  };
-
-  const handleDeleteConfirm = (e) => {
-    if (e) e.stopPropagation();
-    if (data?.onDelete) {
-      data.onDelete(id);
+    if (deleteConfirmState) {
+      if (data?.onDelete) {
+        data.onDelete(id);
+      }
+      setDeleteConfirmState(false);
+    } else {
+      setDeleteConfirmState(true);
     }
-    setShowDeleteConfirm(false);
   };
 
-  const handleDeleteCancel = (e) => {
-    if (e) e.stopPropagation();
-    setShowDeleteConfirm(false);
+  const handleMouseLeave = () => {
+    setIsHovered(false);
+    setDeleteConfirmState(false);
+    const handles = document.querySelectorAll('.react-flow__handle');
+    handles.forEach(handle => {
+      if (handle.closest('.react-flow__node').contains(handle)) {
+        handle.style.opacity = '0.5';
+      }
+    });
   };
 
   return (
     <div 
+      ref={nodeRef}
       style={baseStyle}
-      onMouseEnter={() => {
-        setIsHovered(true);
-        const handles = document.querySelectorAll('.react-flow__handle');
-        handles.forEach(handle => {
-          if (handle.closest('.react-flow__node').contains(handle)) {
-            handle.style.opacity = '1';
-          }
-        });
-      }}
-      onMouseLeave={() => {
-        setIsHovered(false);
-        const handles = document.querySelectorAll('.react-flow__handle');
-        handles.forEach(handle => {
-          if (handle.closest('.react-flow__node').contains(handle)) {
-            handle.style.opacity = '0.5';
-          }
-        });
-      }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={handleMouseLeave}
     >
       <div style={headerActionsStyle}>
         <button
@@ -282,19 +211,17 @@ const BaseNode = ({
           )}
         </button>
         <button
-          style={iconButtonStyle}
+          style={{
+            ...iconButtonStyle,
+            color: deleteConfirmState ? '#EF4444' : theme.colors.text.secondary,
+            position: 'relative'
+          }}
           onClick={handleDeleteClick}
-          title="Delete"
+          title={deleteConfirmState ? "Click to confirm delete" : "Delete"}
         >
           <RiDeleteBinLine size={18} />
+          {deleteConfirmState && <DeleteConfirmDialog onCancel={() => setDeleteConfirmState(false)} />}
         </button>
-        {showDeleteConfirm && (
-          <DeleteConfirmDialog
-            nodeName={data?.label || label || type}
-            onConfirm={handleDeleteConfirm}
-            onCancel={handleDeleteCancel}
-          />
-        )}
       </div>
       <div style={headerStyle}>
         <div style={headerContentStyle}>

@@ -1,40 +1,26 @@
-// outputNode.js
-
 import { useState } from 'react';
+import { Handle, Position } from 'reactflow';
 import BaseNode from '../components/BaseNode';
-import { BsBoxArrowRight } from 'react-icons/bs';
+import { TbMathFunction } from 'react-icons/tb';
 
-const OUTPUT_TYPES = {
-  'text': 'Text',
-  'number': 'Number',
-  'file': 'File',
-  'image': 'Image',
-  'audio': 'Audio',
-  'video': 'Video',
-  'json': 'JSON',
-  'csv': 'CSV',
-  'boolean': 'Boolean'
+const MATH_OPERATIONS = {
+  'add': 'Add',
+  'subtract': 'Subtract',
+  'multiply': 'Multiply',
+  'divide': 'Divide',
+  'power': 'Power',
+  'sqrt': 'Square Root',
+  'log': 'Logarithm',
+  'mod': 'Modulo'
 };
 
-export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
-  // Extract node number from id for auto-incrementing label
-  const nodeNumber = id.split('-')[1] || '0';
-  const defaultName = `output_${nodeNumber}`;
+export const MathNode = ({ id, data = { isExpanded: true }, ...props }) => {
+  const [operation, setOperation] = useState(data?.operation || 'add');
 
-  const [currName, setCurrName] = useState(data?.outputName || defaultName);
-  const [outputType, setOutputType] = useState(data?.outputType || 'text');
-
-  const handleNameChange = (e) => {
-    setCurrName(e.target.value);
+  const handleOperationChange = (e) => {
+    setOperation(e.target.value);
     if (data?.onDataChange) {
-      data.onDataChange(id, 'outputName', e.target.value);
-    }
-  };
-
-  const handleTypeChange = (e) => {
-    setOutputType(e.target.value);
-    if (data?.onDataChange) {
-      data.onDataChange(id, 'outputType', e.target.value);
+      data.onDataChange(id, 'operation', e.target.value);
     }
   };
 
@@ -51,21 +37,6 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
     color: '#666',
     fontWeight: '500',
     marginBottom: '2px'
-  };
-
-  const inputStyle = {
-    padding: '8px 12px',
-    borderRadius: '6px',
-    border: '1px solid #ddd',
-    fontSize: '0.9rem',
-    width: '100%',
-    boxSizing: 'border-box',
-    outline: 'none',
-    transition: 'all 0.2s ease',
-    backgroundColor: '#f5f5f5',
-    cursor: 'not-allowed',
-    color: '#666',
-    textAlign: 'center'
   };
 
   const selectStyle = {
@@ -95,8 +66,8 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
         gap: '8px',
         width: '100%'
       }}>
-        <BsBoxArrowRight size={18} />
-        <span style={{ flex: 1 }}>Output</span>
+        <TbMathFunction size={18} />
+        <span style={{ flex: 1 }}>Math Operation</span>
       </div>
       <div style={{
         fontSize: '0.75rem',
@@ -105,7 +76,7 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
         lineHeight: '1.4',
         width: '100%'
       }}>
-        Export data from your workflow
+        Perform mathematical operations on numeric inputs
       </div>
     </div>
   );
@@ -120,25 +91,13 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
       gap: '12px'
     }}>
       <div style={inputGroupStyle}>
-        <label style={labelStyle}>Output Name</label>
-        <input 
-          type="text" 
-          value={defaultName}
-          style={inputStyle}
-          placeholder={defaultName}
-          readOnly
-          disabled
-        />
-      </div>
-      
-      <div style={inputGroupStyle}>
-        <label style={labelStyle}>Output Type</label>
+        <label style={labelStyle}>Operation</label>
         <select 
-          value={outputType} 
-          onChange={handleTypeChange}
+          value={operation}
+          onChange={handleOperationChange}
           style={selectStyle}
         >
-          {Object.entries(OUTPUT_TYPES).map(([value, label]) => (
+          {Object.entries(MATH_OPERATIONS).map(([value, label]) => (
             <option key={value} value={value}>
               {label}
             </option>
@@ -151,17 +110,16 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
   return (
     <BaseNode
       id={id}
-      type="OutputNode"
+      type="MathNode"
       label={titleContent}
       data={{
         ...data,
         isExpanded: data.isExpanded ?? true,
         label: titleContent,
-        outputName: currName,
-        outputType
+        operation
       }}
       content={nodeContent}
       {...props}
     />
   );
-};
+}; 

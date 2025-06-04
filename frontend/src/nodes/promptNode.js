@@ -1,16 +1,15 @@
-// textNode.js
-
 import { useState } from 'react';
+import { Handle, Position } from 'reactflow';
 import BaseNode from '../components/BaseNode';
-import { TbTextRecognition } from 'react-icons/tb';
+import { TbPrompt } from 'react-icons/tb';
 
-export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
-  const [currText, setCurrText] = useState(data?.text || '');
+export const PromptNode = ({ id, data = { isExpanded: true }, ...props }) => {
+  const [promptTemplate, setPromptTemplate] = useState(data?.promptTemplate || '');
 
-  const handleTextChange = (e) => {
-    setCurrText(e.target.value);
+  const handlePromptChange = (e) => {
+    setPromptTemplate(e.target.value);
     if (data?.onDataChange) {
-      data.onDataChange(id, 'text', e.target.value);
+      data.onDataChange(id, 'promptTemplate', e.target.value);
     }
   };
 
@@ -35,7 +34,7 @@ export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
     border: '1px solid #ddd',
     fontSize: '0.9rem',
     width: '100%',
-    minHeight: '100px',
+    minHeight: '120px',
     boxSizing: 'border-box',
     outline: 'none',
     transition: 'all 0.2s ease',
@@ -56,8 +55,8 @@ export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
         gap: '8px',
         width: '100%'
       }}>
-        <TbTextRecognition size={18} />
-        <span style={{ flex: 1 }}>Text</span>
+        <TbPrompt size={18} />
+        <span style={{ flex: 1 }}>Prompt Template</span>
       </div>
       <div style={{
         fontSize: '0.75rem',
@@ -66,7 +65,7 @@ export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
         lineHeight: '1.4',
         width: '100%'
       }}>
-        Create and edit text content for your workflow
+        Create dynamic prompt templates with variables
       </div>
     </div>
   );
@@ -81,12 +80,12 @@ export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
       gap: '12px'
     }}>
       <div style={inputGroupStyle}>
-        <label style={labelStyle}>Text Content</label>
+        <label style={labelStyle}>Template</label>
         <textarea
-          value={currText}
-          onChange={handleTextChange}
+          value={promptTemplate}
+          onChange={handlePromptChange}
           style={textareaStyle}
-          placeholder="Enter your text here..."
+          placeholder="Enter your prompt template here...&#10;Use {{variable}} syntax for dynamic values"
         />
       </div>
     </div>
@@ -95,16 +94,16 @@ export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
   return (
     <BaseNode
       id={id}
-      type="TextNode"
+      type="PromptNode"
       label={titleContent}
       data={{
         ...data,
         isExpanded: data.isExpanded ?? true,
         label: titleContent,
-        text: currText
+        promptTemplate
       }}
       content={nodeContent}
       {...props}
     />
   );
-};
+}; 
