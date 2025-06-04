@@ -4,6 +4,7 @@ import UI from './ui';
 import Toolbar from './toolbar';
 import { SubmitButton } from './submit';
 import 'reactflow/dist/style.css';
+import './styles/Dialog.css';
 
 const App = () => {
   return (
@@ -18,7 +19,7 @@ const App = () => {
           transform: 'translateX(-50%)',
           zIndex: 4
         }}>
-      <SubmitButton />
+          <SubmitButton />
         </div>
       </ReactFlowProvider>
     </div>
