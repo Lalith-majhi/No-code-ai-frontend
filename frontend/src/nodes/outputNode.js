@@ -1,6 +1,6 @@
 // outputNode.js
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import BaseNode from '../components/BaseNode';
 import { BsBoxArrowRight } from 'react-icons/bs';
 
@@ -23,6 +23,21 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
 
   const [currName, setCurrName] = useState(data?.outputName || defaultName);
   const [outputType, setOutputType] = useState(data?.outputType || 'text');
+  const [outputValue, setOutputValue] = useState(data?.outputValue || '');
+  const [variables, setVariables] = useState([]);
+
+  // Function to detect variables in the output value
+  const detectVariables = (text) => {
+    const regex = /\{\{([^}]+)\}\}/g;
+    const matches = [...text.toString().matchAll(regex)];
+    return matches.map(match => match[1].trim());
+  };
+
+  // Update variables when output value changes
+  useEffect(() => {
+    const detectedVars = detectVariables(outputValue);
+    setVariables(detectedVars);
+  }, [outputValue]);
 
   const handleNameChange = (e) => {
     setCurrName(e.target.value);
@@ -38,6 +53,13 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
     }
   };
 
+  const handleOutputChange = (e) => {
+    setOutputValue(e.target.value);
+    if (data?.onDataChange) {
+      data.onDataChange(id, 'outputValue', e.target.value);
+    }
+  };
+
   const inputGroupStyle = {
     marginBottom: '12px',
     display: 'flex',
@@ -48,8 +70,8 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
 
   const labelStyle = {
     fontSize: '0.8rem',
-    color: '#666',
-    fontWeight: '500',
+    color: '#444',
+    fontWeight: '600',
     marginBottom: '2px'
   };
 
@@ -62,21 +84,15 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
     boxSizing: 'border-box',
     outline: 'none',
     transition: 'all 0.2s ease',
-    backgroundColor: '#f5f5f5',
-    cursor: 'not-allowed',
-    color: '#666',
-    textAlign: 'center'
+    backgroundColor: '#fff',
+    '&:focus': {
+      borderColor: '#6466f1',
+      boxShadow: '0 0 0 3px rgba(100, 102, 241, 0.1)'
+    }
   };
 
   const selectStyle = {
-    padding: '8px 12px',
-    borderRadius: '6px',
-    border: '1px solid #ddd',
-    fontSize: '0.9rem',
-    width: '100%',
-    boxSizing: 'border-box',
-    outline: 'none',
-    transition: 'all 0.2s ease',
+    ...inputStyle,
     backgroundColor: '#fff',
     cursor: 'pointer',
     appearance: 'none',
@@ -85,6 +101,52 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
     backgroundPosition: 'right 12px center',
     backgroundSize: '12px',
     paddingRight: '32px'
+  };
+
+  const textareaStyle = {
+    padding: '8px 12px',
+    borderRadius: '6px',
+    border: '1px solid #ddd',
+    fontSize: '0.9rem',
+    width: '100%',
+    minHeight: '60px',
+    maxHeight: '200px',
+    boxSizing: 'border-box',
+    outline: 'none',
+    transition: 'all 0.2s ease',
+    backgroundColor: '#fff',
+    resize: 'vertical',
+    fontFamily: 'inherit',
+    overflowY: 'auto',
+    '&:focus': {
+      borderColor: '#6466f1',
+      boxShadow: '0 0 0 3px rgba(100, 102, 241, 0.1)'
+    }
+  };
+
+  const outputPreviewStyle = {
+    padding: '8px 12px',
+    borderRadius: '6px',
+    border: '1px solid #ddd',
+    fontSize: '0.9rem',
+    width: '100%',
+    minHeight: '60px',
+    maxHeight: '200px',
+    boxSizing: 'border-box',
+    backgroundColor: '#fff',
+    resize: 'vertical',
+    fontFamily: 'inherit',
+    overflowY: 'auto'
+  };
+
+  const variableStyle = {
+    fontSize: '0.8rem',
+    color: '#6466f1',
+    padding: '4px 8px',
+    backgroundColor: 'rgba(100, 102, 241, 0.1)',
+    borderRadius: '4px',
+    margin: '2px',
+    display: 'inline-block'
   };
 
   const titleContent = (
@@ -105,7 +167,7 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
         lineHeight: '1.4',
         width: '100%'
       }}>
-        Export data from your workflow
+        Define output format and preview output data
       </div>
     </div>
   );
@@ -145,6 +207,28 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
           ))}
         </select>
       </div>
+
+      <div style={inputGroupStyle}>
+        <label style={labelStyle}>Output</label>
+        <textarea
+          value={outputValue}
+          onChange={handleOutputChange}
+          style={textareaStyle}
+          placeholder="Preview of output data... Use {{variable}} for dynamic values"
+        />
+        {variables.length > 0 && (
+          <div style={{ marginTop: '8px' }}>
+            <label style={labelStyle}>Variables Used:</label>
+            <div style={{ marginTop: '4px' }}>
+              {variables.map((variable, index) => (
+                <span key={index} style={variableStyle}>
+                  {variable}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
     </div>
   );
 
@@ -158,7 +242,9 @@ export const OutputNode = ({ id, data = { isExpanded: true }, ...props }) => {
         isExpanded: data.isExpanded ?? true,
         label: titleContent,
         outputName: currName,
-        outputType
+        outputType,
+        outputValue,
+        variables
       }}
       content={nodeContent}
       {...props}

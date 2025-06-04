@@ -23,8 +23,8 @@ export const PromptNode = ({ id, data = { isExpanded: true }, ...props }) => {
 
   const labelStyle = {
     fontSize: '0.8rem',
-    color: '#666',
-    fontWeight: '500',
+    color: '#444',
+    fontWeight: '600',
     marginBottom: '2px'
   };
 

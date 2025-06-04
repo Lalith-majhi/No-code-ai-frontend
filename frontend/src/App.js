@@ -18,7 +18,7 @@ const App = () => {
           transform: 'translateX(-50%)',
           zIndex: 4
         }}>
-          <SubmitButton />
+      <SubmitButton />
         </div>
       </ReactFlowProvider>
     </div>

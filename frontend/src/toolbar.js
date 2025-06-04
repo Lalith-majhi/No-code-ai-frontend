@@ -151,7 +151,7 @@ const Toolbar = () => {
     def.label.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  return (
+    return (
     <div style={toolbarStyle}>
       <div style={searchContainerStyle}>
         <IoSearchOutline style={searchIconStyle} />
@@ -201,9 +201,9 @@ const Toolbar = () => {
             <span style={labelStyle}>{def.label}</span>
           </div>
         ))}
-      </div>
-    </div>
-  );
+            </div>
+        </div>
+    );
 };
 
 // Helper function to render node icons

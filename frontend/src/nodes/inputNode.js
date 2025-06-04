@@ -58,8 +58,8 @@ export const InputNode = ({ id, data = { isExpanded: true }, ...props }) => {
 
   const labelStyle = {
     fontSize: '0.8rem',
-    color: '#666',
-    fontWeight: '500',
+    color: '#444',
+    fontWeight: '600',
     marginBottom: '2px'
   };
 
@@ -138,14 +138,14 @@ export const InputNode = ({ id, data = { isExpanded: true }, ...props }) => {
     }}>
       <div style={inputGroupStyle}>
         <label style={labelStyle}>Input Name</label>
-        <input 
-          type="text" 
+          <input 
+            type="text" 
           value={defaultName}
           style={inputStyle}
           placeholder={defaultName}
           readOnly
           disabled
-        />
+          />
       </div>
       
       <div style={inputGroupStyle}>
@@ -160,7 +160,7 @@ export const InputNode = ({ id, data = { isExpanded: true }, ...props }) => {
               {label}
             </option>
           ))}
-        </select>
+          </select>
       </div>
     </div>
   );

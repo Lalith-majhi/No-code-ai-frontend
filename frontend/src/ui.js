@@ -13,10 +13,22 @@ import ReactFlow, {
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { nodeTypes, nodeDefinitions } from './config/nodeDefinitions';
+import CustomEdge from './components/CustomEdge';
+
+// Define edge types
+const edgeTypes = {
+  custom: CustomEdge
+};
 
 const UI = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+  const [isConnecting, setIsConnecting] = useState(false);
+
+  // Add handler for edge deletion
+  const handleEdgeDelete = useCallback((edgeId) => {
+    setEdges((eds) => eds.filter((edge) => edge.id !== edgeId));
+  }, [setEdges]);
 
   // Add handler for node data changes
   const handleNodeDataChange = useCallback((nodeId, field, value) => {
@@ -36,6 +48,14 @@ const UI = () => {
     );
   }, [setNodes]);
 
+  const onConnectStart = useCallback(() => {
+    setIsConnecting(true);
+  }, []);
+
+  const onConnectEnd = useCallback(() => {
+    setIsConnecting(false);
+  }, []);
+
   const onConnect = useCallback(
     (params) => {
       // Validate connection
@@ -50,15 +70,23 @@ const UI = () => {
 
       if (!sourceOutput || !targetInput) return;
 
-      // Add the edge with animation
+      setIsConnecting(false);
+
+      // Add the edge with custom type and delete handler
       setEdges((eds) => addEdge({
         ...params,
-        type: 'smoothstep',
-        animated: true,
-        style: { stroke: '#6466f1' }
+        type: 'custom',
+        animated: false,
+        style: { 
+          stroke: '#6466f1',
+          strokeWidth: 2
+        },
+        data: {
+          onEdgeDelete: handleEdgeDelete
+        }
       }, eds));
     },
-    [nodes, setEdges]
+    [nodes, setEdges, handleEdgeDelete]
   );
 
   const onDragOver = useCallback((event) => {
@@ -160,15 +188,25 @@ const UI = () => {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onConnect={onConnect}
+        onConnectStart={onConnectStart}
+        onConnectEnd={onConnectEnd}
         onDragOver={onDragOver}
         onDrop={onDrop}
         onNodesDelete={onNodesDelete}
         nodeTypes={nodeTypes}
+        edgeTypes={edgeTypes}
         fitView
         deleteKeyCode={['Backspace', 'Delete']}
         multiSelectionKeyCode={['Meta', 'Shift']}
         snapToGrid={true}
         snapGrid={[15, 15]}
+        connectionMode="loose"
+        connectionLineStyle={{
+          stroke: '#6466f1',
+          strokeWidth: 2,
+          strokeDasharray: '5 5',
+          strokeOpacity: 0.75
+        }}
       >
         <Background />
         <Controls />

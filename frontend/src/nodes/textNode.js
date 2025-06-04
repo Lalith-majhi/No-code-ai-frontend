@@ -1,11 +1,39 @@
 // textNode.js
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import BaseNode from '../components/BaseNode';
 import { TbTextRecognition } from 'react-icons/tb';
 
 export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
   const [currText, setCurrText] = useState(data?.text || '');
+  const [variables, setVariables] = useState([]);
+  const textareaRef = useRef(null);
+
+  // Function to detect variables in the text
+  const detectVariables = (text) => {
+    const regex = /\{\{([^}]+)\}\}/g;
+    const matches = [...text.matchAll(regex)];
+    return matches.map(match => match[1].trim());
+  };
+
+  // Function to adjust textarea height
+  const adjustTextareaHeight = () => {
+    if (textareaRef.current) {
+      textareaRef.current.style.height = 'auto';
+      textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`;
+    }
+  };
+
+  // Update variables when text changes
+  useEffect(() => {
+    const detectedVars = detectVariables(currText);
+    setVariables(detectedVars);
+  }, [currText]);
+
+  // Adjust height when text changes
+  useEffect(() => {
+    adjustTextareaHeight();
+  }, [currText]);
 
   const handleTextChange = (e) => {
     setCurrText(e.target.value);
@@ -24,8 +52,8 @@ export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
 
   const labelStyle = {
     fontSize: '0.8rem',
-    color: '#666',
-    fontWeight: '500',
+    color: '#444',
+    fontWeight: '600',
     marginBottom: '2px'
   };
 
@@ -35,17 +63,29 @@ export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
     border: '1px solid #ddd',
     fontSize: '0.9rem',
     width: '100%',
-    minHeight: '100px',
+    minHeight: '60px',
+    maxHeight: '400px',
     boxSizing: 'border-box',
     outline: 'none',
     transition: 'all 0.2s ease',
     backgroundColor: '#fff',
-    resize: 'vertical',
+    resize: 'none',
     fontFamily: 'inherit',
+    overflowY: 'hidden',
     '&:focus': {
       borderColor: '#6466f1',
       boxShadow: '0 0 0 3px rgba(100, 102, 241, 0.1)'
     }
+  };
+
+  const variableStyle = {
+    fontSize: '0.8rem',
+    color: '#6466f1',
+    padding: '4px 8px',
+    backgroundColor: 'rgba(100, 102, 241, 0.1)',
+    borderRadius: '4px',
+    margin: '2px',
+    display: 'inline-block'
   };
 
   const titleContent = (
@@ -83,11 +123,24 @@ export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
       <div style={inputGroupStyle}>
         <label style={labelStyle}>Text Content</label>
         <textarea
-          value={currText}
-          onChange={handleTextChange}
+          ref={textareaRef}
+          value={currText} 
+          onChange={handleTextChange} 
           style={textareaStyle}
-          placeholder="Enter your text here..."
+          placeholder="Enter your text here... Use {{variable}} for dynamic values"
         />
+        {variables.length > 0 && (
+          <div style={{ marginTop: '8px' }}>
+            <label style={labelStyle}>Variables Used:</label>
+            <div style={{ marginTop: '4px' }}>
+              {variables.map((variable, index) => (
+                <span key={index} style={variableStyle}>
+                  {variable}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
@@ -101,7 +154,8 @@ export const TextNode = ({ id, data = { isExpanded: true }, ...props }) => {
         ...data,
         isExpanded: data.isExpanded ?? true,
         label: titleContent,
-        text: currText
+        text: currText,
+        variables
       }}
       content={nodeContent}
       {...props}
