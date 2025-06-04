@@ -116,51 +116,56 @@ const BaseNode = ({
   outputs = [],
   content,
   style = {},
-  data
+  data = { isExpanded: true }
 }) => {
   const [isHovered, setIsHovered] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const isExpanded = data?.isExpanded ?? true;
 
   const baseStyle = {
-    padding: theme.spacing.md,
+    padding: '12px',
     borderRadius: theme.borderRadius.lg,
     background: theme.colors.surface,
     border: `1px solid ${theme.colors.border}`,
     boxShadow: theme.shadows.md,
-    minWidth: '200px',
-    maxWidth: data?.isExpanded ? 'none' : '300px',
+    minWidth: '250px',
+    width: '250px',
+    maxWidth: '250px',
     transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+    position: 'relative',
     ...style
   };
 
   const headerStyle = {
-    fontWeight: '600',
-    marginBottom: theme.spacing.sm,
-    padding: theme.spacing.sm,
-    borderBottom: `1px solid ${theme.colors.border}`,
-    color: theme.colors.text.primary,
-    fontSize: '0.875rem',
     display: 'flex',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: data?.isExpanded ? 'rgba(100, 102, 241, 0.05)' : 'transparent',
+    flexDirection: 'column',
+    width: '100%',
+    padding: '4px 8px 12px 8px',
+    borderBottom: !isExpanded ? 'none' : `1px solid ${theme.colors.border}`,
+    backgroundColor: 'transparent',
     borderRadius: `${theme.borderRadius.lg - 2}px ${theme.borderRadius.lg - 2}px 0 0`,
-    transition: 'background-color 0.3s ease',
-    position: 'relative'
+    transition: 'all 0.3s ease',
+    boxSizing: 'border-box'
   };
 
   const headerContentStyle = {
     display: 'flex',
-    alignItems: 'center',
-    gap: '8px'
+    flexDirection: 'column',
+    width: '100%',
+    gap: '4px',
+    padding: '0 32px 0 0'
   };
 
   const headerActionsStyle = {
     display: 'flex',
     alignItems: 'center',
-    gap: '12px',
+    gap: '4px',
     opacity: isHovered ? 1 : 0,
-    transition: 'opacity 0.2s ease'
+    transition: 'opacity 0.2s ease',
+    position: 'absolute',
+    top: '8px',
+    right: '8px',
+    zIndex: 1
   };
 
   const iconButtonStyle = {
@@ -205,16 +210,22 @@ const BaseNode = ({
   };
 
   const contentStyle = {
-    padding: theme.spacing.sm,
+    padding: '12px 8px',
     position: 'relative',
     transition: 'all 0.3s ease',
-    minHeight: data?.isExpanded ? '200px' : 'auto'
+    width: '100%',
+    boxSizing: 'border-box',
+    display: !isExpanded ? 'none' : 'flex',
+    flexDirection: 'column',
+    opacity: !isExpanded ? 0 : 1,
+    height: !isExpanded ? 0 : 'auto',
+    overflow: 'hidden'
   };
 
   const handleExpand = (e) => {
     e.stopPropagation();
     if (data?.onExpand) {
-      data.onExpand(data.id);
+      data.onExpand(id);
     }
   };
 
@@ -226,7 +237,7 @@ const BaseNode = ({
   const handleDeleteConfirm = (e) => {
     if (e) e.stopPropagation();
     if (data?.onDelete) {
-      data.onDelete(data.id);
+      data.onDelete(id);
     }
     setShowDeleteConfirm(false);
   };
@@ -258,9 +269,36 @@ const BaseNode = ({
         });
       }}
     >
+      <div style={headerActionsStyle}>
+        <button
+          style={iconButtonStyle}
+          onClick={handleExpand}
+          title={!isExpanded ? "Expand" : "Contract"}
+        >
+          {!isExpanded ? (
+            <IoExpandOutline size={18} />
+          ) : (
+            <IoContractOutline size={18} />
+          )}
+        </button>
+        <button
+          style={iconButtonStyle}
+          onClick={handleDeleteClick}
+          title="Delete"
+        >
+          <RiDeleteBinLine size={18} />
+        </button>
+        {showDeleteConfirm && (
+          <DeleteConfirmDialog
+            nodeName={data?.label || label || type}
+            onConfirm={handleDeleteConfirm}
+            onCancel={handleDeleteCancel}
+          />
+        )}
+      </div>
       <div style={headerStyle}>
         <div style={headerContentStyle}>
-          <span>{data?.label || label || type}</span>
+          {typeof label === 'string' ? <span>{data?.label || label || type}</span> : label}
           {data?.subtitle && (
             <span style={{ 
               fontSize: '0.75rem', 
@@ -268,33 +306,6 @@ const BaseNode = ({
             }}>
               {data.subtitle}
             </span>
-          )}
-        </div>
-        <div style={headerActionsStyle}>
-          <button
-            style={iconButtonStyle}
-            onClick={handleExpand}
-            title={data?.isExpanded ? "Contract" : "Expand"}
-          >
-            {data?.isExpanded ? (
-              <IoContractOutline size={18} />
-            ) : (
-              <IoExpandOutline size={18} />
-            )}
-          </button>
-          <button
-            style={iconButtonStyle}
-            onClick={handleDeleteClick}
-            title="Delete"
-          >
-            <RiDeleteBinLine size={18} />
-          </button>
-          {showDeleteConfirm && (
-            <DeleteConfirmDialog
-              nodeName={data?.label || label || type}
-              onConfirm={handleDeleteConfirm}
-              onCancel={handleDeleteCancel}
-            />
           )}
         </div>
       </div>

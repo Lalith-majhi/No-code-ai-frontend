@@ -29,11 +29,7 @@ const Toolbar = () => {
     const nodeData = nodeDefinitions[nodeType];
     event.dataTransfer.setData('application/reactflow', JSON.stringify({
       type: nodeType,
-      data: {
-        label: nodeData.label,
-        inputs: nodeData.inputs,
-        outputs: nodeData.outputs
-      }
+      data: nodeData
     }));
     event.dataTransfer.effectAllowed = 'move';
   };

@@ -1,12 +1,9 @@
 import React from 'react';
 import BaseNode from '../components/BaseNode';
 import TranslationContent from '../components/nodes/TranslationContent';
+import { InputNode } from '../nodes/inputNode';
 
 // Node-specific content components
-const InputForm = () => (
-  <input type="text" placeholder="Enter input..." style={{ width: '100%' }} />
-);
-
 const TextEditor = () => (
   <textarea placeholder="Enter text..." style={{ width: '100%', minHeight: '100px' }} />
 );
@@ -64,8 +61,15 @@ export const nodeDefinitions = {
     label: "Input",
     inputs: [],
     outputs: ["output"],
-    content: <InputForm />,
-    style: { background: '#f0f7ff' }
+    component: InputNode,
+    style: { 
+      background: '#f0f7ff',
+      minWidth: '250px',
+      padding: '15px',
+      borderRadius: '8px',
+      border: '1px solid rgba(0, 0, 0, 0.1)',
+      boxShadow: '0 2px 6px rgba(0, 0, 0, 0.05)'
+    }
   },
   TextNode: {
     label: "Text",
@@ -143,6 +147,10 @@ export const createNodeComponent = (type) => {
   if (!definition) {
     console.error(`No definition found for node type: ${type}`);
     return null;
+  }
+
+  if (definition.component) {
+    return definition.component;
   }
 
   return (props) => (

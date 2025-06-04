@@ -12,11 +12,29 @@ import ReactFlow, {
   useEdgesState
 } from 'reactflow';
 import 'reactflow/dist/style.css';
-import { nodeTypes } from './config/nodeDefinitions';
+import { nodeTypes, nodeDefinitions } from './config/nodeDefinitions';
 
 const UI = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
+
+  // Add handler for node data changes
+  const handleNodeDataChange = useCallback((nodeId, field, value) => {
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === nodeId) {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              [field]: value
+            }
+          };
+        }
+        return node;
+      })
+    );
+  }, [setNodes]);
 
   const onConnect = useCallback(
     (params) => {
@@ -58,12 +76,6 @@ const UI = () => {
             data: {
               ...node.data,
               isExpanded
-            },
-            style: {
-              ...node.style,
-              width: isExpanded ? '400px' : undefined,
-              height: isExpanded ? '300px' : undefined,
-              zIndex: isExpanded ? 1000 : undefined
             }
           };
         }
@@ -88,7 +100,8 @@ const UI = () => {
 
       try {
         const { type, data: nodeData } = JSON.parse(data);
-        const { label, inputs, outputs } = nodeData;
+        const definition = nodeDefinitions[type];
+        if (!definition) return;
 
         // Get the drop position relative to the viewport
         const reactFlowBounds = event.target.getBoundingClientRect();
@@ -97,25 +110,27 @@ const UI = () => {
           y: event.clientY - reactFlowBounds.top
         };
 
+        // Count existing nodes of this type for auto-incrementing
+        const existingNodesOfType = nodes.filter(n => n.type === type).length;
+        const newNodeNumber = existingNodesOfType + 1;
+
         // Create new node with the enhanced data
         const newNode = {
-          id: `${type}-${nodes.length + 1}`,
+          id: `${type}-${newNodeNumber}`,
           type,
           position,
           data: {
-            id: `${type}-${nodes.length + 1}`,
-            label,
-            inputs: inputs || [],
-            outputs: outputs || [],
+            id: `${type}-${newNodeNumber}`,
+            label: definition.label,
+            inputs: definition.inputs || [],
+            outputs: definition.outputs || [],
             onExpand: handleNodeExpand,
             onDelete: handleNodeDelete,
-            isExpanded: false
+            onDataChange: handleNodeDataChange,
+            isExpanded: true
           },
           style: {
-            background: '#ffffff',
-            border: '1px solid #e5e7eb',
-            borderRadius: '8px',
-            padding: '10px',
+            ...definition.style,
             transition: 'all 0.3s ease'
           }
         };
@@ -125,7 +140,7 @@ const UI = () => {
         console.error('Error creating node:', error);
       }
     },
-    [nodes, setNodes, handleNodeExpand, handleNodeDelete]
+    [nodes, setNodes, handleNodeExpand, handleNodeDelete, handleNodeDataChange]
   );
 
   const onNodesDelete = useCallback(
