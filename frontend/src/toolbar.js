@@ -5,8 +5,6 @@ import { nodeDefinitions } from './config/nodeDefinitions';
 import { theme } from './styles/theme';
 import { IoSearchOutline } from 'react-icons/io5';
 import { 
-  FiArrowRight, 
-  FiArrowLeft,
   FiFilter,
   FiTerminal
 } from 'react-icons/fi';
@@ -28,7 +26,15 @@ const Toolbar = () => {
   const [hoveredNode, setHoveredNode] = useState(null);
 
   const onDragStart = (event, nodeType) => {
-    event.dataTransfer.setData('application/reactflow', nodeType);
+    const nodeData = nodeDefinitions[nodeType];
+    event.dataTransfer.setData('application/reactflow', JSON.stringify({
+      type: nodeType,
+      data: {
+        label: nodeData.label,
+        inputs: nodeData.inputs,
+        outputs: nodeData.outputs
+      }
+    }));
     event.dataTransfer.effectAllowed = 'move';
   };
 
