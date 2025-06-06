@@ -9,7 +9,8 @@ import ReactFlow, {
   MiniMap,
   addEdge,
   useNodesState,
-  useEdgesState
+  useEdgesState,
+  useReactFlow
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 import { nodeTypes, nodeDefinitions } from './config/nodeDefinitions';
@@ -24,6 +25,7 @@ const UI = () => {
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState([]);
   const [isConnecting, setIsConnecting] = useState(false);
+  const { project } = useReactFlow();
 
   // Add handler for edge deletion
   const handleEdgeDelete = useCallback((edgeId) => {
@@ -131,18 +133,15 @@ const UI = () => {
         const definition = nodeDefinitions[type];
         if (!definition) return;
 
-        // Get the drop position relative to the viewport
         const reactFlowBounds = event.target.getBoundingClientRect();
-        const position = {
+        const position = project({
           x: event.clientX - reactFlowBounds.left,
           y: event.clientY - reactFlowBounds.top
-        };
+        });
 
-        // Count existing nodes of this type for auto-incrementing
         const existingNodesOfType = nodes.filter(n => n.type === type).length;
         const newNodeNumber = existingNodesOfType + 1;
 
-        // Create new node with the enhanced data
         const newNode = {
           id: `${type}-${newNodeNumber}`,
           type,
@@ -159,7 +158,10 @@ const UI = () => {
           },
           style: {
             ...definition.style,
-            transition: 'all 0.3s ease'
+            transition: 'all 0.3s ease',
+            width: '250px',  // Fixed width for all nodes
+            minWidth: '250px',
+            maxWidth: '250px'
           }
         };
 
@@ -168,7 +170,7 @@ const UI = () => {
         console.error('Error creating node:', error);
       }
     },
-    [nodes, setNodes, handleNodeExpand, handleNodeDelete, handleNodeDataChange]
+    [nodes, setNodes, handleNodeExpand, handleNodeDelete, handleNodeDataChange, project]
   );
 
   const onNodesDelete = useCallback(
@@ -195,7 +197,10 @@ const UI = () => {
         onNodesDelete={onNodesDelete}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
-        fitView
+        fitView={false}  // Disable automatic fitting
+        defaultViewport={{ x: 0, y: 0, zoom: 1 }}  // Set default viewport
+        minZoom={0.1}
+        maxZoom={2}
         deleteKeyCode={['Backspace', 'Delete']}
         multiSelectionKeyCode={['Meta', 'Shift']}
         snapToGrid={true}
