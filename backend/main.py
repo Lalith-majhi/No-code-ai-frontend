@@ -5,6 +5,10 @@ from collections import defaultdict
 
 app = FastAPI()
 
+@app.get("/")
+def read_root():
+    return {"message": "Hello from backend!"}
+
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
