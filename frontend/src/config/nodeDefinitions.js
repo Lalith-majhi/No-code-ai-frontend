@@ -9,7 +9,7 @@ import { PromptNode } from '../nodes/promptNode';
 import { ImageNode } from '../nodes/imageNode';
 import { FilterNode } from '../nodes/filterNode';
 import { LoggerNode } from '../nodes/loggerNode';
-import TranslationContent from '../components/nodes/TranslationContent';
+import { TranslationNode } from '../nodes/translationNode';
 
 // Node-specific content components
 const TextEditor = () => (
@@ -131,12 +131,12 @@ export const nodeDefinitions = {
     component: LoggerNode,
     style: { background: '#f5f5f5' }
   },
-  // Add the new Translation Node
+  // Updated Translation Node
   TranslationNode: {
     label: "Translation",
     inputs: ["text"],
     outputs: ["translatedText"],
-    content: <TranslationContent />,
+    component: TranslationNode,
     style: { 
       background: '#e6f3ff',
       minWidth: '200px'
